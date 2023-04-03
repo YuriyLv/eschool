@@ -1,0 +1,3 @@
+# Variables without explicit default values
+   tfenv_dir:  /home/{{ ansible_user }}/.tfenv
+   tfenv_bindir: /home/{{ ansible_user }}/bin

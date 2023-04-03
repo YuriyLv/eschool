@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  become: true
+  roles:
+    - common
+
+- hosts: ci_cd
+  become: true
+  roles:
+    - common
+    - docker
+    - gitlab_runner
+    - tfenv
+    - cd_ansible
+
+- hosts: monitor
+  become: true
+  roles:
+    - monitor
+

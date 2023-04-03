@@ -1,0 +1,7 @@
+[ci_cd]
+${ci_cd_ips}
+
+
+[monitor]
+${monitor_ips}
+

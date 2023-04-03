@@ -1,0 +1,45 @@
+variables:
+  IMAGE_TAG: $CI_COMMIT_REF_NAME-b-$CI_PIPELINE_IID
+  CI_REGISTRY_FULL: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
+
+.backend_runner:
+  tags:
+    - backend
+
+stages:
+  - build
+  - delivery
+  - deployment
+  - cleanup
+
+before_script:
+  - echo "Starting CI/CD"
+
+Build:
+  stage: build
+  script:
+    - docker build -t $CI_REGISTRY_FULL:$IMAGE_TAG -t $CI_REGISTRY_FULL:latest .
+  extends: .backend_runner
+
+Delivery:
+  before_script:
+    - echo $TOKEN_REGISTRY | docker login -u $USER_REGISTRY $CI_REGISTRY --password-stdin
+  stage: delivery
+  script:
+    - docker push $CI_REGISTRY_FULL:$IMAGE_TAG
+    - docker push $CI_REGISTRY_FULL:latest
+  extends: .backend_runner
+
+Deployment:
+  stage: deployment
+  script:
+    - cd ~/ansible && ansible-playbook -i ec2.py cd_backend.yml -e db_url=$db_url -e db_user=$db_user -e db_pass=$db_pass -vvvv
+  when: manual
+  extends: .backend_runner
+
+CleanUp:
+  stage: cleanup
+  script:
+    - docker system prune -a -f
+  when: manual
+  extends: .backend_runner

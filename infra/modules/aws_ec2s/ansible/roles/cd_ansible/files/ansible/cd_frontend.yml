@@ -1,0 +1,5 @@
+---
+- hosts: tag_aws_autoscaling_groupName_dev_frontend
+  become: true
+  roles:
+    - cd_frontend

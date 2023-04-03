@@ -1,0 +1,11 @@
+---
+- name: Pulling new container
+  shell: docker pull {{backend_image}}:{{backend_version}}
+
+- name: Stop docker container
+  shell: docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)
+  ignore_errors: true
+
+- name: Start new docker container
+  shell: docker run -p 8080:8080 -e DATASOURCE_URL='{{db_url}}' -e DATASOURCE_USERNAME='{{db_user}}' -e DATASOURCE_PASSWORD='{{db_pass}}' -d {{backend_image}}:{{backend_version}}
+

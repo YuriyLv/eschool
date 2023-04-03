@@ -1,0 +1,11 @@
+---
+- name: Pulling new container
+  shell: docker pull {{frontend_image}}:{{frontend_version}}
+
+- name: Stop docker container
+  shell: docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)
+  ignore_errors: true
+
+- name: Start new docker container
+  shell: docker run -p 80:80 -d {{frontend_image}}:{{frontend_version}}
+

@@ -1,0 +1,36 @@
+---
+- name: Ensure a list of yum packages are installed
+  yum:
+    name: "{{ packages }}"
+    state: latest
+    update_cache: yes
+  vars:
+    packages:
+      - libselinux-python
+
+- name: install boto
+  shell: python -m pip install boto
+
+- name: Copy ansible directory to CI_CD instance
+  ansible.builtin.copy:
+    src: ./files/ansible
+    dest: /home/ec2-user
+
+- name: Copy private key
+  ansible.builtin.copy:
+    src: /home/ec2-user/.ssh/id_rsa
+    dest: /home/ec2-user/.ssh/id_rsa
+
+- name: Change file ownership, group and permissions
+  ansible.builtin.file:
+    path: /home/ec2-user/ansible/ec2.py
+    owner: ec2-user
+    group: ec2-user
+    mode: '0774'
+
+- name: Change file ownership, group and permissions
+  ansible.builtin.file:
+    path: /home/ec2-user/.ssh/id_rsa
+    owner: ec2-user
+    group: ec2-user
+    mode: '0400'

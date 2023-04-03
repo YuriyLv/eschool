@@ -1,0 +1,10 @@
+---
+ansible_user: "ec2-user"
+ansible_ssh_private_key_file: "/home/ec2-user/.ssh/id_rsa"
+backend_image: "registry.gitlab.com/escool/backend"
+backend_version: "latest"
+frontend_image: "registry.gitlab.com/escool/frontend"
+frontend_version: "latest"
+db_url: ${db_url}
+db_user: ${db_user}
+db_pass: ${db_pass}

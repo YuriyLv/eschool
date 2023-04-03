@@ -1,0 +1,45 @@
+---
+- name: Add the official GitLab repository
+  shell: curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | sudo bash
+  become: true
+
+- name: Install the latest version of GitLab Runner
+  yum:
+    name: gitlab-runner
+    state: latest
+    update_cache: yes
+
+- name: Stop gitlab-runner
+  service:
+    name: gitlab-runner
+    state: stopped
+
+- name: Change base configuration
+  shell: mv /etc/systemd/system/gitlab-runner.service  /etc/systemd/system/gitlab-runner.service.bak && \
+         gitlab-runner install --user={{ ansible_user }} --working-directory=/home/{{ ansible_user }} && \
+         rm /etc/systemd/system/gitlab-runner.service.bak
+  become: true
+
+- name: Start gitlab-runner
+  service:
+    name: gitlab-runner
+    state: started
+
+- name: Registration gitlab runner
+  shell: gitlab-runner register \
+            --non-interactive \
+            --url "{{ gitlab_url }}" \
+            --registration-token "{{ registration_token }}" \
+            --executor "{{ runner_executor }}" \
+            --description "eschool-runner" \
+            --tag-list "{{runner_tags_list}}" \
+            --run-untagged="true" \
+            --locked="false" \
+            --access-level="not_protected"
+  become: true
+
+- name: Change gitlab configuration
+  shell: sed -i 's/concurrent = 1/concurrent = 3/g' /etc/gitlab-runner/config.toml
+  become: true
+  notify:
+    - Restart gitlab runner

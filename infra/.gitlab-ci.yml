@@ -1,0 +1,178 @@
+variables:
+  WORKSPACE: "dev"
+  TERRAFORM_VERSION: ""
+
+  LAYER_00: "projects/$WORKSPACE/00_layer_init"
+  LAYER_10: "projects/$WORKSPACE/10_layer_network"
+  LAYER_20: "projects/$WORKSPACE/20_layer_ec2s"
+  LAYER_30: "projects/$WORKSPACE/30_layer_rds"
+  LAYER_40: "projects/$WORKSPACE/40_layer_deploy"
+
+.runner:
+  tags:
+    - infra
+
+stages:
+  - test
+  - plan
+  - apply
+
+before_script:
+  - export TERRAFORM_VERSION=$(grep 'required_version' ./modules/aws_versions/versions.tf | sed 's/.*<= \(.*\)"/\1/')
+  - tfenv install $TERRAFORM_VERSION && tfenv use $TERRAFORM_VERSION || echo "something wrong"
+  - terraform workspace new $WORKSPACE || terraform workspace select $WORKSPACE
+
+#____________________________00_layer_init
+
+00_test:
+  stage: test
+  script:
+    - cd ./$LAYER_00
+    - terraform init
+    - terraform workspace select $WORKSPACE
+    - terraform validate
+  when: manual
+  extends: .runner
+
+00_plan:
+  stage: plan
+  script:
+    - cd ./$LAYER_00
+    - terraform init
+    - terraform workspace select $WORKSPACE
+    - terraform plan -out=tfplan
+  needs: ["00_test"]
+  extends: .runner
+
+00_apply:
+  stage: apply
+  script:
+    - cd ./$LAYER_00
+    - terraform apply -auto-approve tfplan
+  needs: ["00_plan"]
+  when: manual
+  extends: .runner
+
+#____________________________10_layer_network
+
+10_test:
+  stage: test
+  script:
+    - cd ./$LAYER_10
+    - terraform init
+    - terraform workspace select $WORKSPACE
+    - terraform validate
+  when: manual
+  extends: .runner
+
+10_plan:
+  stage: plan
+  script:
+    - cd ./$LAYER_10
+    - terraform init
+    - terraform workspace select $WORKSPACE
+    - terraform plan -out=tfplan
+  needs: ["10_test"]
+  extends: .runner
+
+10_apply:
+  stage: apply
+  script:
+    - cd ./$LAYER_10
+    - terraform apply -auto-approve tfplan
+  needs: ["10_plan"]
+  when: manual
+  extends: .runner
+
+#____________________________20_layer_ec2s
+
+20_test:
+  stage: test
+  script:
+    - cd ./$LAYER_20
+    - terraform init
+    - terraform workspace select $WORKSPACE
+    - terraform validate
+  when: manual
+  extends: .runner
+
+20_plan:
+  stage: plan
+  script:
+    - cd ./$LAYER_20
+    - terraform init
+    - terraform workspace select $WORKSPACE
+    - terraform plan -out=tfplan
+  needs: ["20_test"]
+  extends: .runner
+
+20_apply:
+  stage: apply
+  script:
+    - cd ./$LAYER_20
+    - terraform apply -auto-approve tfplan
+  needs: ["20_plan"]
+  when: manual
+  extends: .runner
+
+#____________________________30_layer_rds
+
+30_test:
+  stage: test
+  script:
+    - cd ./$LAYER_30
+    - terraform init
+    - terraform workspace select $WORKSPACE
+    - terraform validate
+  when: manual
+  extends: .runner
+
+30_plan:
+  stage: plan
+  script:
+    - cd ./$LAYER_30
+    - terraform init
+    - terraform workspace select $WORKSPACE
+    - terraform plan -out=tfplan
+  needs: ["30_test"]
+  extends: .runner
+
+30_apply:
+  stage: apply
+  script:
+    - cd ./$LAYER_30
+    - terraform apply -auto-approve tfplan
+  needs: ["30_plan"]
+  when: manual
+  extends: .runner
+
+#____________________________40_layer_deploy
+
+40_test:
+  stage: test
+  script:
+    - cd ./$LAYER_40
+    - terraform init
+    - terraform workspace select $WORKSPACE
+    - terraform validate
+  when: manual
+  extends: .runner
+
+40_plan:
+  stage: plan
+  script:
+    - cd ./$LAYER_40
+    - terraform init
+    - terraform workspace select $WORKSPACE
+    - terraform plan -out=tfplan
+  needs: ["40_test"]
+  extends: .runner
+
+40_apply:
+  stage: apply
+  script:
+    - cd ./$LAYER_40
+    - terraform apply -auto-approve tfplan
+  needs: ["40_plan"]
+  when: manual
+  extends: .runner

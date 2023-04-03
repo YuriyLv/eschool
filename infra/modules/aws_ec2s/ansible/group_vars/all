@@ -1,0 +1,7 @@
+---
+ansible_user: ${bastion_user}
+ansible_ssh_private_key_file: ${destination_bastion_internal_key}
+gitlab_url: ${gitlab_url}
+registration_token: ${registration_token}
+runner_tags_list: ${runner_tags_list}
+runner_executor: ${runner_executor}

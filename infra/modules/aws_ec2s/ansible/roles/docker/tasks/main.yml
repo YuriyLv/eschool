@@ -1,0 +1,47 @@
+---
+- name: Ensure a list of yum packages are installed
+  yum:
+    name: "{{ packages }}"
+    state: latest
+    update_cache: yes
+  vars:
+    packages:
+      - python3
+      - python3-devel
+      - libffi-devel
+      - openssl-devel
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+      - amazon-linux-extras
+      - aws-cli
+      - pip
+
+- name: Add extras repository
+  shell: yum-config-manager --enable extras
+
+- name: Install docker via amazon-linux-extras packages
+  shell: amazon-linux-extras install docker -y
+  become: true
+
+- name: Add user ec2-user to docker group
+  user:
+    name: ec2-user
+    groups: docker
+    append: yes
+  become: yes
+
+- name: Enable Docker CE service at startup
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: install Development Tools
+  shell: yum groupinstall -y "Development Tools"
+
+- name: update python pip
+  shell: python -m pip install -U pip
+
+- name: install docker-compose from pip
+  shell: python3 -m pip install docker-compose

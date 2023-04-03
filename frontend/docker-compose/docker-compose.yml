@@ -1,0 +1,34 @@
+services:
+  frontend:
+    image: itca_front:v1
+    networks:
+      - eschool-network
+    container_name: eschool-frontend
+    ports:
+      - 80:80
+    restart: unless-stopped
+  db:
+    image: mysql:latest
+    networks:
+      - eschool-network
+    container_name: eschool-mysql
+    ports:
+      - 3306:3306
+    restart: unless-stopped
+    env_file:
+     - ./.env
+  backend:
+    image: itca_back:v1
+    networks:
+      - eschool-network
+    container_name: eschool-backend
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    restart: unless-stopped
+    env_file:
+     - ./.env
+networks:
+  eschool-network:
+    driver: bridge
